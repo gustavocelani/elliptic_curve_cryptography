@@ -1,0 +1,263 @@
+\documentclass[12pt]{article}
+\usepackage{sbc-template}
+
+% Bibliotecas
+\usepackage[Algoritmo]{algorithm}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{blindtext}
+\usepackage{float}
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{mathtools}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{pgfplots}
+\usepackage{scrextend}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{enumerate}
+\usepackage[makeroom]{cancel}
+\urlstyle{same}
+\usetikzlibrary{positioning,fit,calc,shapes,snakes}
+\pgfkeys{/pgf/number format/.cd,use comma,1000 sep={.}}
+
+% Constantes textuais
+\newcommand{\internet}{Internet\xspace}
+\newcommand{\web}{Web\xspace}
+\newcommand{\bits}{\textit{bits}\xspace}
+\newcommand{\Bits}{\textit{Bits}\xspace}
+\newcommand{\bytes}{\textit{bytes}\xspace}
+\newcommand{\Bytes}{\textit{Bytes}\xspace}
+
+% Math
+\newcommand{\Mod}[1]{\ \mathrm{mod}\ #1}
+\newcommand{\ModP}[1]{\ (\mathrm{mod}\ #1)}
+
+\pagestyle{empty}
+
+\sloppy
+\begin{document}
+
+    \title{
+        Criptografia de Curvas Elípticas: Definição e Recomendações
+    }
+    
+    \author{CARLOS\inst{1}}
+
+    \address{
+        Universidade Estadual de Campinas (UNICAMP)\\Campinas - SP, Brasil\\2019
+        \email{gustavo\_celani@hotmail.com}
+    }
+
+    \maketitle
+
+    \begin{abstract}
+        Elliptic Curve Cryptography (ECC), proposed by Koblitz and Miller in 1985, has been studied and applied bringing significant results to the area \cite{vanstone2000state}. However, not all curves are considered safe to the point of use in cryptographic systems. Their parameters are standardized by institutions to their properties become computationally inviolable.
+    \end{abstract}
+
+    \begin{resumo}
+        A criptografia de curvas elípticas (ECC), proposta por Koblitz e Miller em 1985, vêm sendo estudada e aplicada trazendo resultados um tanto quanto significativos para a área \cite{vanstone2000state}. Porém nem todas as curvas são consideradas seguras a ponto de serem utilizadas em sistemas criptográficos. Elas são padronizadas por instituições que recomendam parâmetros para que suas propriedades se tornem computacionalmente invioláveis.
+    \end{resumo}
+  
+    \section{Introdução}
+  
+        A criptografia é uma das ferramentas mais importantes da área de segurança da informação. Ela garante a confidencialidade dos dados, limitando o acesso à informação tão somente para aqueles que possuem a devida autorização e conhecimento das convenções estabelecidas. As chaves criptográficas são utilizadas para controlar suas operações. 
+
+        Existem inúmeros algoritmos criptográficos, podendo ser eles simétricos ou assimétricos. Na criptografia simétrica, existe uma única chave compartilhada entre as partes envolvidas, onde, a mesma chave é utilizada para cifrar e descifrar os dados. Já a criptografia assimétrica, empregada na ECC, utiliza-se de um par de chaves pública-privada. Seu funcionamento é explicado mais detalhadamente na sessão \ref{subsec:criptografia_assimetrica}.
+
+    \section{Revisão da Teoria}
+    \label{sec:revisao_da_teoria}
+    
+        \subsection{Criptografia Assimétrica}
+        \label{subsec:criptografia_assimetrica}
+
+            A criptografia assimétrica, também conhecida como "criptografia de chave pública", utiliza um par de chaves matematicamente relacionadas entre si para suas operações: uma pública e uma privada. É de fundamental importância que a chave privada permaneça em sigilo. Já a chave pública pode ser divulgada sem que ocorra nenhum comprometimento na segurança do sistema criptográfico.
+
+            Na operação de encriptação (cifragem) é utilizada a chave pública. Uma vez cifrada a mensagem só pode ser descriptografada (descifrada) pela chave privada. Estas operações garantem somente o sigilo da mensagem. Para se obter o não-repúdio é necessário utilizar o procedimento de assinatura digital. Neste processo a mensagem é assinada digitalmente utilizando a chave privada e todos que possuem a chave pública são capazes de garantir a procedência da mensagem.
+
+        \subsection{Curvas Elipticas em Campos Finitos}
+        \label{subsec:campos_finitos}
+
+            Um campo finito pode ser definido, simplificadamente, como um conjunto numérico composto por um número finito de elementos. Exemplificando com um arquétipo de campo finito comumente utilizado neste contexto tem-se $\mathbb{F}^*_p$, onde $p$ é um número primo. Este conjunto é definido por todos os inteiros entre 1 até $p-1$ ($\mathbb{F}^*_p = \{1, ... , p-1\}$) nos quais suas manipulações são feitas por meio da aritmética modular.
+            
+            Curvas elípticas podem ser representadas sobre um campo finito. Uma curva elíptica $E(\mathbb{F}^*_p)$ é representada por um conjunto de pontos $(x, y)$ de tal forma que satisfaça sua equação geral descrita pela Equação \ref{eq:modelo_curva_eliptica}:
+
+            \begin{equation}
+            \label{eq:modelo_curva_eliptica}
+                E(\mathbb{F}^*_p) \equiv y^2 \ModP p \equiv x^3+ax+b \ModP p
+            \end{equation}
+
+            Além de satisfazer sua equação característica, uni-se um ponto $O$ chamado de "ponto no infinito" ao conjunto de saída. Também é necessário que os parâmetros constantes da equação pertençam ao campo finito descriminado. Por fim, são excluídas as curvas elípticas singulares. A Equação \ref{eq:restricoes_curvas_elipticas} expõe as condições citadas:
+
+            \begin{equation}
+            \label{eq:restricoes_curvas_elipticas}
+                E(\mathbb{F}^*_p)
+                \begin{cases}
+                    \{x,y,a,b,c,d,e\} \in \mathbb{F}^*_p & \quad \\
+                    4a^3+27b^2 \ModP p \ne 0 & \quad \\
+                    \cup \{O\}
+                \end{cases}
+            \end{equation}
+
+            Para o contexto de criptografia de curvas elípticas é interessante citar as seguintes propriedades encontradas neste tipo específico de curvas \cite{laska2012introducao} \cite{portnoi2005curvas}:
+
+            \begin{enumerate}[I]
+                \item As curvas apresentam simetria com relação ao eixo $x$. Logo: $(x, -y) \in E(\mathbb{F}^*_p)$.
+                \item A condição de não-singularidade ($4a^3+27b^2 \ModP p \ne 0$) garante que as duas derivadas parciais sejam diferentes de zero para todo $(x, -y) \in E(\mathbb{F}^*_p)$.
+                \item Uma curva elíptica intersecta o eixo $x$ ou uma única vez ou três vezes. Onde as intersecções ocorrem na inflexão da condição de não-singularidade, ou seja: $4a^3+27b^2 \ModP p > 0$ para a primeira ocorrência, e $4a^3+27b^2 \ModP p < 0$ para a segunda e terceira, se houver.
+                \item Para dois pontos distintos pertencentes à curva $E(\mathbb{F}^*_p)$, tem-se que a soma entre esses pontos resulta em um terceiro ponto também pertencente à curva. Matematicamente: $M(x_m, y_m) + N(x_n, y_n) = R(x_r, y_r)$, onde $\{M,N,R\} \in E(\mathbb{F}^*_p)$.
+            \end{enumerate}
+
+        \subsection{Problema do Logaritmo Discreto}
+        \label{subsec:logaritmo_discreto}
+
+            O problema do logaritmo discreto (\textit{DLP - Discrete Logarithm Problem}) expõe uma debilidade computacional no sentido de não ser capaz de resolvê-lo em tempo polinomial.
+            
+            O DLP descreve que: dados um grupo $\mathbb{G}$ e $\{y, \alpha\} \in \mathbb{G}$ no qual $y$ é potência de $\alpha$. O logaritmo discreto de $y$ na base $\alpha$ é o menor inteiro não negativo $x$ tal que $\alpha^x = y$, denotado por $\log_{\alpha}y = x$. Onde não é possível calcular $x$ em tempo hábil \cite{vania2011curvas} \cite{hankerson2004guide}.
+
+            Simplificadamente, o problema descreve uma função considerada de sentido único computacionamente. Conhecidos $P$ e $Q$, é computacionamente impraticável encontrar o valor de $k$ onde $Q = k \times P$. Enquanto o cálculo de $Q$ é executado em tempo polinomial por computadores considerados comuns.
+
+    \section{Criptografia de Curvas Elípticas}
+    \label{sec:criptografia_curvas_elipticas}
+
+        A criptografia de curvas elípticas (\textit{ECC - Elliptical Curves Cryptography}) é um sistema criptográfico assimétrico (seção \ref{subsec:criptografia_assimetrica}) que faz uso de curvas elípticas sobre um campo finito (seção \ref{subsec:campos_finitos}) e está assegurado pelo problema do logaritmo discreto (seção \ref{subsec:logaritmo_discreto}).
+
+        \subsection{Geração de Chaves}
+        \label{subsec:geracao_de_chaves}
+
+            A geração da chave privada ($d$) é a eleição de um número inteiro positivo aleatório diferente de zero e pertencente ao campo finito de alta ordem $n$. Logo, tem-se que $\{d\} \in \mathbb{F}^*_n$. Este número deve ser mantido em sigilo absoluto para que não haja nenhuma transgressão ao algoritmo \cite{dahab2000overview}.
+
+            Já para a chave pública ($D$), seleciona-se uma curva elíptica e um ponto base ($G$) pertencente à curva selecionada. Tanto a curva, quanto o ponto base escolhidos podem ser publicados sem que haja qualquer comprometimento do algoritmo. Então é realizada a multiplcação da chave privada $d$ pelo ponto base $G$. Matematicamente: $D = d \times G$. O DLP garante que a chave privada $d$ não será calculada mesmo $D$ e $G$ sendo elementos públicos que não necessitam de sigilo \cite{dahab2000overview}.
+
+            Ao final desse processo, foram definidos a curva elíptica e o ponto base na qual o algoritmo se baseará para realizar suas operações. E um par de chaves pública-privada foi gerado a partir destes parâmetros.
+
+    \section{Diffie-Hellman Baseado em Curvas Elípticas}
+    \label{sec:diffie_hellman}
+
+        A troca de chaves utilizando Diffie-Hellman pode utilizar-se de propriedades das curvas elípticas em sua metodologia (\textit{ECDH - Elliptic Curve Diffie-Hellman}). O protocolo de acordo de chaves possibilita que um segredo  seja compartilhado por meio de um canal inseguro de tal forma que somente as duas partes envolvidas tenham acesso à ele e que nenhuma terceira consiga calculá-lo ou até mesmo deduzí-lo.
+
+        O ECDH (Figura \ref{fig:ECDH}) funciona da seguinte maneira: parte-se da premissa que duas partes ($A$ e $B$) necessitem, por algum motivo, de compartilhar um segredo. Para isto, $A$ e $B$ acordam parâmetros públicos da curva, nos quais um adversário ($E$) pode ter acesso. Estes parâmetros públicos são:
+
+        \begin{itemize}
+            \item $p$: Campo no qual a curva é definida.
+            \item $a, b$: Valores que definiem a equação característica da curva (Equação \ref{eq:modelo_curva_eliptica}).
+            \item $G_{x}$: Coordenada X do ponto base.
+            \item $G_{y}$: Coordenada Y do ponto base.
+            \item $n$: Número primo referente à ordem do ponto base $G$.
+            \item $h$: Cofator.
+        \end{itemize}
+
+        Acordados estes parâmetros publicamente, cada parte gera uma chave privada ($d_{\{A, B\}}$) e calcula seu par público ($D_{\{A, B\}}$) com base nos parâmetros previamente acordados (metodologia explicada na subseção \ref{subsec:geracao_de_chaves}). As chaves públicas são compartilhadas entre as $A$ e $B$ enquanto suas respectivas chaves privadas são mantidas em sigilo. O segredo compartilhado ($K$) será o resultado da multiplicação entre a chave privada com a chave pública da parte oposta ($K = d_{\{A, B\}} \times D_{\{B, A\}}$).
+
+        \input{figures/fig_ECDH.tex}
+
+        A equidade de $K$ é matematicamente comprovado pelas Equações \ref{eq:equidade_segredo_compartilhado_first} à \ref{eq:equidade_segredo_compartilhado_last}.
+
+        \begin{equation}
+        \label{eq:equidade_segredo_compartilhado_first}
+            K_{A} = K_{B}
+        \end{equation}
+        \begin{equation}
+            d_{A} \times D_{B} = d_{B} \times D_{A}
+        \end{equation}
+        \begin{equation}
+            d_{A} \times (d_{B} \times G) = d_{B} \times (d_{A} \times G)
+        \end{equation}
+        \begin{equation}
+        \label{eq:equidade_segredo_compartilhado_last}
+            d_{A} \times d_{B} \times G = d_{B} \times d_{A} \times G
+        \end{equation}
+
+        As chaves privadas envolvidas no protocolo ($d_{\{A, B\}}$) estão asseguradas pelo DLP (sessão \ref{subsec:logaritmo_discreto}). Logo, mesmo $A$ possuindo $K$, $d_{A}$ e $G$, ele não consegue calcular $d_{B}$. O mesmo ocorre com a parte $B$, que possui $K$, $d_{B}$ e $G$ e é incapaz de calcular $d_{A}$.
+
+    \section{ElGamal Baseado em Curvas Elípticas}
+    \label{sec:elgamal}
+
+        A criptografia de ElGamal pode ser aplicada sobre curvas elípticas uma vez que ela trabalha com um grupo. A seguir, são descritos os processos de encriptação/decriptação partindo da premissa que $A$ deseja enviar uma mensagem sigilosa ($m$) para $B$ por meio de um canal de comunicação inseguro \cite{lara2010curvas}.
+
+        O primeiro passo é definir os parâmetros públicos da curva (vide sessão \ref{sec:diffie_hellman}). Após acordar os parâmetros comuns entre as partes, cada uma delas gera seu par de chaves pública-privada (vide sessão \ref{subsec:geracao_de_chaves}). Feito isso, as chaves públicas são trocadas entre $A$ e $B$. Todos estes compartilhamentos podem ser feitos em claro por um meio de canal inseguro de comunicação sem que haja comprometimento do protocolo. Neste ponto, ambas as partes conhecem os parâmetros públicos da curva e a chave pública de seu oposto.
+
+        O emissor ($A$) da mensagem computa o criptograma\footnote{Mensagem cifrada, codificada, criptografada} ($C$) da seguinte maneira: $C = m + (d_{A} \times D_{B})$. Uma vez computado, o criptograma é transmitido ao receptor ($B$), que por sua vez inicia o processo de decriptação para extrair a mensagem $m$ do criptograma enviado pelo emissor. O processo de decriptação realizado por $B$ se consiste em calcular $m$ da seguinte forma: $m = C - (d_{B} \times D_{A})$.
+        
+        \clearpage
+        \newpage
+        
+        O protocolo é matematicamente comprovado pelas Equações \ref{eq:elgamal_first} à \ref{eq:elgamal_last}.
+
+        \begin{equation}
+        \label{eq:elgamal_first}
+            \begin{cases}
+                C = m_{A} + (d_{A} \times D_{B}) & \quad \\
+                m_{B} = C - (d_{B} \times D_{A})
+            \end{cases}
+        \end{equation}
+        \begin{equation}
+            \begin{cases}
+                C = m_{A} + (d_{A} \times D_{B}) & \quad \\
+                C = m_{B} + (d_{B} \times D_{A})
+            \end{cases}
+        \end{equation}
+        \begin{equation}
+            m_{A} + (d_{A} \times D_{B}) = m_{B} + (d_{B} \times D_{A})
+        \end{equation}
+        \begin{equation}
+            m_{A} + [d_{A} \times (d_{B} \times G)] = m_{B} + [d_{B} \times (d_{A} \times G)]
+        \end{equation}
+        \begin{equation}
+            m_{A} + \cancel{[d_{A} \times (d_{B} \times G)]} = m_{B} + \cancel{[d_{B} \times (d_{A} \times G)]}
+        \end{equation}
+        \begin{equation}
+        \label{eq:elgamal_last}
+            m_{A} = m_{B}
+        \end{equation}
+
+    \section{Equivalências}
+    \label{sec:equivalencias}
+    
+        Quando comparado às outras técnicas criptográficas conhecidas, como criptografia simétrica com DES, ou criptografia assimétrica utilizando RSA, o ECC se mostra mais eficiente do que o AES porém inferior ao DES, no que se refere ao tamanho da chave necessária. Na Tabela \ref{tab:equivalencias_ecc} e no gráfico da Figura \ref{graph:equivalencias_ecc}, pode-se observar a equivência entre estes criptosistemas (comparação levando em consideração ataques conhecidos) \cite{dahab2000overview}:
+
+        \input{tables/tab_equivalencias_ecc.tex}
+
+        \input{graphics/graph_equivalencias_ecc.tex}
+
+    \section{Recomendações de Uso}
+    \label{sec:recomendacoes}
+
+        Nem todas curvas elípticas são consideradas suficientemente seguras para serem utilizadas em sistemas criptográficos. Para obter uma curva elíptica segura para uso é necessário calcular seus parâmetros de tal forma que nenhuma propriedade seja violada.
+
+        Para evitar que todo criptógrafo que almeje fazer uso da ECC calcule esses parâmetros, existem entidades que os definem. Um exemplo é o NIST (\textit{National Institute of Standards and Technology}), que publica um documento chamado \textit{FIPS PUB 186-X Digital Signature Standard (DSS)} contendo parâmetros para serem utilizados em curvas para que as mesmas sejam consideradas seguras. A Tabela \ref{tab:recomendacoes_ecc} apresentada alguns parâmetros recomendados para a curva P-256 publicados no \textit{FIPS PUB 186-4} em 2013 \cite{nist2013fipspub186}:
+
+        \input{tables/tab_recomendacoes_ecc.tex}
+
+    \section{Conclusão}
+    \label{sec:conclusão}
+
+        A criptografia de curvas elípticas está ganhando espaço no que se refere à ser elegida para uso dentre todos algoritmos criptorgáficos disponíveis devido à sua eficiência. Foi visto que para garantir o mesmo nível de segurança de um AES utilizando chave de, por exemplo, 3072 bits, o ECC necessita de uma chave de apenas 256 bits. Isto representa que, para este caso, o ECC possui uma eficiência 12 vezes maior do que o AES. O desempenho do ECC é uma grande vantagem quando comparado com os demais algoritmos assimétricos.
+
+        Porém, para se atingir a segurança oferecida pelo ECC, é necessário eleger os parâmetros corretos para sua utilização, uma vez que não são todas as curvas elípticas que são seguras quando usadas em sistemas criptográficos. Este fator é o que, normalmente, torna as implementações de criptografia de curvas elípticas vulneráveis.
+        
+        \clearpage
+        \newpage
+
+    \section{Trabalhos Futuros}
+    \label{sec:trabalhos_futuros}
+
+        No decorrer do estudo, foram identificados pontos que condescendem possíveis extensões na pesquisa. Um dos principais pontos a serem estudados seria desenvolver um aprofundamento em outros protocolos que utilizam ECC em seu funcionamento. Além do ECDH abordado neste trabalho, pode-se destacar:
+
+        \begin{itemize}
+            \item Elliptic Curve Digital Signature Algorithm (ECDSA)
+            \item Elliptic Curve AES (ECAES)
+        \end{itemize}
+
+    \bibliographystyle{sbc}
+    \bibliography{bibliografia}
+
+\flushend 
+\end{document}

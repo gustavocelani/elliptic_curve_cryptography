@@ -1,0 +1,39 @@
+% Figura: Ellipt Curve Diffie-Hellman Protocol            
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+    
+        \tikzset{block/.style={draw,thick,text width=3.5cm,minimum height=0.5cm,align=center},line/.style={-latex}};
+        \tikzset{dblock/.style={draw,dashed,thick,text width=3.5cm,minimum height=0.5cm,align=center},line/.style={-latex}};
+
+        % System A Nodes
+        \node[dblock]                        (a)     {$A$};
+        \node[block, below = 0.5cm of a]     (ap)    {$[ p, a, b, G_{x}, G_{y}, n, h ]$};
+        \node[block, below = 0.2cm of ap]    (apriv) {$d_{A}$};
+        \node[block, below = 0.2cm of apriv] (apub)  {$D_{A} = d_{A} \times G$};
+        \node[block, below = 0.2cm of apub]  (abpub) {$D_{B}$};
+        \node[block, below = 0.2cm of abpub] (ak)    {$K = d_{A} \times D_{B}$};
+        
+        % System B Nodes
+        \node[dblock, right = 6cm  of a]     (b)     {$B$};
+        \node[block, below = 0.5cm of b]     (bp)    {$[ p, a, b, G_{x}, G_{y}, n, h ]$};
+        \node[block, below = 0.2cm of bp]    (bpriv) {$d_{B}$};
+        \node[block, below = 0.2cm of bpriv] (bpub)  {$D_{B} = d_{B} \times G$};
+        \node[block, below = 0.2cm of bpub]  (bapub) {$D_{A}$};
+        \node[block, below = 0.2cm of bapub] (bk)    {$K = d_{B} \times D_{A}$};
+        
+        % Middle arrows
+        \draw[<->, thick] (ap.east)   -- (bp.west);
+        \draw[->, thick]  (apub.east) -- (bapub.west);
+        \draw[->, thick]  (bpub.west) -- (abpub.east);
+        \draw[<->, thick] (ak.east)   -- (bk.west);
+        
+        % Middle Labels
+        \node[thick, align=center] at (5, -0.8)    {Parâmetros Acordados};
+        \node[thick, align=center] at (5, -2.5) {Chave Pública\\Compartilhada};
+        \node[thick, align=center] at (5, -4.4) {Segredo Compartilhado};
+        
+    \end{tikzpicture}
+    \caption{Diffie-Hellman baseado em Curvas Elípticas.}
+    \label{fig:ECDH}
+\end{figure}
